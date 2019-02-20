@@ -66,6 +66,17 @@ predict.dfunc <- function(object, newdata,
       Terms <- delete.response(Terms)
       m <- model.frame(Terms, newdata)
       X <- model.matrix(Terms, m, contrasts.arg = attr(object$covars,"contrasts"))
+      
+      
+      # (jdc, 2/14/2019)  -- drop levels of factors in newdata but not in ddf (so no coef in dfunc)
+      # This hack still provides the params for rows in newdata with this dropped level,
+      # but the estimate for the intercept is used
+      # The coef(object) and ncol(X) will not have the same length if this isn't done, resulting in NA returned for params
+      (toKeep <- attributes(X)$dimnames[[2]][attributes(X)$dimnames[[2]] %in% names(coef(object))])
+      X <- X[, attributes(X)$dimnames[[2]] %in% toKeep]
+      
+      
+      
     }
     
     BETA <- coef(object)
