@@ -41,6 +41,7 @@
 # if("Rdistance" %in% rownames(installed.packages()) == FALSE){
 #   install.packages("Rdistance")
 # }
+
 require(Rdistance)
 # 
 # 
@@ -74,7 +75,10 @@ test_that("lines_Covars() operates as it should", {
 data(sparrowDetectionData)
 head(sparrowDetectionData)
 
-
+##Start Stefan's assertion statements for part 2.
+expect_identical(head(sparrowDetectionData$dist), c(16.8, 12.2, 24.1, 3.5, 69.7, 10.0))
+expect_equal(ncol(head(sparrowDetectionData)), 5)
+expect_equal(nrow(head(sparrowDetectionData)), 6)
 
 # If the observers recorded sighting distance and sighting angle instead of perpendicular distance (as is often common
 # in line transect surveys), you can use the `perp.dists` function (detailed in Section 3) to calculate the perpendicular
@@ -87,6 +91,11 @@ head(sparrowDetectionData)
 # Other columns (e.g., transect-level covariates) are ignored, but may be useful in modeling abundance later
 data(sparrowSiteData)
 head(sparrowSiteData)
+
+expect_identical(head(sparrowSiteData$shrub), c(20.1, 19.3, 19.8, 19.9, 5.2, 5.2))
+expect_equal(ncol(head(sparrowSiteData)), 8)
+expect_equal(nrow(head(sparrowSiteData)), 6)
+##End Stefan's assertion statements for part 2.
 #////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////#
 
 
@@ -129,6 +138,20 @@ sparrow.dfunc <- dfuncEstim(formula=dist~zBare, detectionData=sparrowDetectionDa
 
 sparrow.dfunc
 
+##Start Stefan's assertion statements for part 3:
+elements = names(sparrow.dfunc)
+expect_identical(names(sparrow.dfunc), elements)
+
+expect_identical(typeof(sparrow.dfunc), "list")
+expect_visible(sparrow.dfunc)
+expect_is(sparrow.dfunc, "dfunc")
+expect_equal(sparrow.dfunc$loglik, 1481, tolerance = 0.01)
+
+checkCoeff = grepl("p(>|z|)", sparrow.dfunc)
+checkAll = names(sparrow.dfunc)
+
+expect_identical(grepl("p(>|z|)", sparrow.dfunc), checkCoeff)
+expect_identical(names(sparrow.dfunc), checkAll)
 # Coefficients:
 #   Estimate  SE          z          p(>|z|)    
 # (Intercept)  3.880301  0.06298025  61.611392  0.000000000
@@ -145,6 +168,20 @@ plot(sparrow.dfunc, newdata=data.frame(zBare=seq(min(sparrowSiteData$zBare), max
 ## Two covariates
 sparrow2.dfunc <- dfuncEstim(formula=dist~zBare+observer, detectionData=sparrowDetectionData, siteData=sparrowSiteData,
                             likelihood="halfnorm", w.hi=trunc)
+
+elements = names(sparrow.dfunc)
+expect_identical(names(sparrow.dfunc), elements)
+
+expect_match(typeof(sparrow2.dfunc), "list")
+expect_visible(sparrow2.dfunc)
+expect_is(sparrow2.dfunc, "dfunc")
+expect_equal(sparrow2.dfunc$w.hi, 100, tolerance = 0.0)
+
+checkCoeff = grepl("Estimate", sparrow2.dfunc)
+checkAll = names(sparrow2.dfunc)
+
+expect_identical(grepl("Estimate", sparrow2.dfunc), checkCoeff)
+expect_identical(names(sparrow2.dfunc), checkAll)
 
 # Call: dfuncEstim(formula = dist ~ zBare + observer, detectionData = sparrowDetectionData,     siteData = sparrowSiteData, likelihood = "halfnorm", w.hi = trunc)
 # 
